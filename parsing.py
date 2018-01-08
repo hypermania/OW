@@ -4,9 +4,6 @@ import re
 from html5_parser import parse
 from lxml import etree
 
-f = open("./sample/StarGazer-11683", "r")
-html = f.read()
-
 hero_id = {
     "Reaper": "0x02E0000000000002",
     "Tracer": "0x02E0000000000003",
@@ -116,5 +113,55 @@ def parse_career_profile(html: str) -> dict:
     
     return result
 
-result = parse_career_profile(html)
+" Parse info from quickplay and competitive."
+def parse_game_mode(mode: etree._Element):
+    general_stats = {}
+    for stat in mode.xpath('.//*[@data-category-id and @data-group-id="comparisons"]'):
+        stat_dict = {}
+        for hero in stat:
+            bar_description = hero.xpath('.//div[@class="description"]')[0].text
+            bar_percentage = hero.get('data-overwatch-progress-percent')
+            stat_dict[id_hero[hero.get('data-hero-guid')]] = (bar_description, bar_percentage)
+        general_stats[id_stat[stat.get('data-category-id')]] = stat_dict
+
+    hero_stats = {}
+    for hero in mode.xpath('.//*[@data-category-id and @data-group-id="stats"]'):
+        hero_dict = {}
+        for stat_group in hero:
+            stat_group_name = stat_group.xpath('.//h5[@class="stat-title"]')[0].text
+            stat_dict = {}
+            for stat in stat_group.xpath('.//tbody')[0]:
+                stat_name = stat[0].text
+                stat_value = stat[1].text
+                stat_dict[stat_name] = stat_value
+                hero_dict[stat_group_name] = stat_dict
+                hero_stats[id_hero[hero.get('data-category-id')]] = hero_dict
+
+    return {'general_stats': general_stats, 'hero_stats': hero_stats}
+
     
+f = open('./sample/StarGazer-11683', 'r')
+html = f.read()
+
+root = parse(html)
+quickplay = root.xpath('.//div[@data-mode="quickplay"]')[0]
+competitive = root.xpath('.//div[@data-mode="competitive"]')[0]
+
+print(time.strftime('%X') + (": Begin parse_career_profile(html)."))
+for i in range(0, 10000):
+    parse_career_profile(html)
+print(time.strftime('%X') + (": End."))
+
+print(time.strftime('%X') + (": Begin parse_game_mode()."))
+for i in range(0, 10000):
+    parse_game_mode(quickplay)
+    parse_game_mode(competitive)   
+print(time.strftime('%X') + (": End."))
+
+print(time.strftime('%X') + (": Begin xpath."))
+for i in range(0, 10000):
+    quickplay.xpath('.//*[@data-category-id and @data-group-id="comparisons"]')
+print(time.strftime('%X') + (": End."))
+
+
+
