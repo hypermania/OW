@@ -70,4 +70,7 @@ for btag in btags[0:10000]:
             continue
 
         ranks.append(int(rank_str))
+
+        if len(ranks) % 10 == 0:
+            print(len(ranks))
         
