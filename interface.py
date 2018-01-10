@@ -4,7 +4,9 @@ import requests
 import time
 from concurrent.futures import ProcessPoolExecutor
 
+
 from parsing import parse_career_profile
+from util import convert_time
 
 PROFILE_URL = 'https://playoverwatch.com/en-us/career/pc/{}'
     
@@ -43,13 +45,16 @@ async def process_html(client, btag, lock, ranks, sem):
         sem.release()
         return None
     
-    rank_str = parsed["general_info"]["rank"]
-    if rank_str == None:
+    #rank_str = parsed["general_info"]["rank"]
+    time_str = parsed["quickplay_stats"]["general_stats"]["Time Played"]["Mercy"][0]
+    total_time = convert_time(time_str)
+    
+    if total_time == None:
         sem.release()
         return None
 
     await lock.acquire()
-    ranks.append(int(rank_str))
+    ranks.append(total_time)
     
     if len(ranks) % 100 == 0:
         print(time.strftime('%X') + (": Obtained %d ranks." % len(ranks)))
@@ -58,7 +63,7 @@ async def process_html(client, btag, lock, ranks, sem):
 
     sem.release()
 
-    return int(rank_str)
+    return total_time
     
             
 async def main():
@@ -77,11 +82,14 @@ async def main():
         print(ranks)
 
 with open('./data/btags.txt', 'r') as btag_file:
-    btags = btag_file.read().split("\n")[:-1]
+    btags = btag_file.read().split("\n")
+    while btags[-1] == '':
+        btags = btags[:-1]
         
 ranks = []
 
 p = ProcessPoolExecutor(4)
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
+
 

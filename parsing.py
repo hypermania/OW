@@ -58,21 +58,21 @@ def parse_career_profile(html: str) -> dict:
     " Parse info from quickplay and competitive."
     def parse_game_mode(mode: etree._Element):
         general_stats = {}
-        for stat in mode.xpath('.//*[@data-category-id and @data-group-id="comparisons"]'):
+        for stat in mode.xpath('./section/div/div[@data-category-id and @data-group-id="comparisons"]'):
             stat_dict = {}
             for hero in stat:
-                bar_description = hero.xpath('.//div[@class="description"]')[0].text
+                bar_description = hero.xpath('./div/div/div[@class="description"]')[0].text
                 bar_percentage = hero.get('data-overwatch-progress-percent')
                 stat_dict[id_hero[hero.get('data-hero-guid')]] = (bar_description, bar_percentage)
             general_stats[id_stat[stat.get('data-category-id')]] = stat_dict
 
         hero_stats = {}
-        for hero in mode.xpath('.//*[@data-category-id and @data-group-id="stats"]'):
+        for hero in mode.xpath('./section/div/div[@data-category-id and @data-group-id="stats"]'):
             hero_dict = {}
             for stat_group in hero:
-                stat_group_name = stat_group.xpath('.//h5[@class="stat-title"]')[0].text
+                stat_group_name = stat_group.xpath('./div/table/thead/tr/th/h5[@class="stat-title"]')[0].text
                 stat_dict = {}
-                for stat in stat_group.xpath('.//tbody')[0]:
+                for stat in stat_group.xpath('./div/table/tbody')[0]:
                     stat_name = stat[0].text
                     stat_value = stat[1].text
                     stat_dict[stat_name] = stat_value
@@ -81,18 +81,17 @@ def parse_career_profile(html: str) -> dict:
 
         return {'general_stats': general_stats, 'hero_stats': hero_stats}
 
-    quickplay = root.xpath('.//div[@data-mode="quickplay"]')[0]
-    competitive = root.xpath('.//div[@data-mode="competitive"]')[0]
+    quickplay = root.xpath('./body/div/div/div[@data-mode="quickplay"]')[0]
+    competitive = root.xpath('./body/div/div/div[@data-mode="competitive"]')[0]
     
     quickplay_stats = parse_game_mode(quickplay)
     competitive_stats = parse_game_mode(competitive)
-
 
     "Parse general info."
     btag_link = root[0].xpath('./meta[@property="og:url"]')[0].get('content')
     btag = re.match(r'^\S+/(\S+)$', btag_link).group(1)
 
-    _rank = root.xpath(".//div[@class='competitive-rank']/div")
+    _rank = root.xpath("./body/div/section/div/div/div/div/div/div/div[@class='competitive-rank']/div")
     if len(_rank) > 0:
         rank = _rank[0].text
     else:
@@ -113,32 +112,37 @@ def parse_career_profile(html: str) -> dict:
     
     return result
 
+
 " Parse info from quickplay and competitive."
+
+"""
 def parse_game_mode(mode: etree._Element):
     general_stats = {}
-    for stat in mode.xpath('.//*[@data-category-id and @data-group-id="comparisons"]'):
+    for stat in mode.xpath('./section/div/div[@data-category-id and @data-group-id="comparisons"]'):
         stat_dict = {}
         for hero in stat:
-            bar_description = hero.xpath('.//div[@class="description"]')[0].text
+            bar_description = hero.xpath('./div/div/div[@class="description"]')[0].text
             bar_percentage = hero.get('data-overwatch-progress-percent')
             stat_dict[id_hero[hero.get('data-hero-guid')]] = (bar_description, bar_percentage)
         general_stats[id_stat[stat.get('data-category-id')]] = stat_dict
 
     hero_stats = {}
-    for hero in mode.xpath('.//*[@data-category-id and @data-group-id="stats"]'):
+    for hero in mode.xpath('./section/div/div[@data-category-id and @data-group-id="stats"]'):
         hero_dict = {}
         for stat_group in hero:
-            stat_group_name = stat_group.xpath('.//h5[@class="stat-title"]')[0].text
+            stat_group_name = stat_group.xpath('./div/table/thead/tr/th/h5[@class="stat-title"]')[0].text
             stat_dict = {}
-            for stat in stat_group.xpath('.//tbody')[0]:
+            for stat in stat_group.xpath('./div/table/tbody')[0]:
                 stat_name = stat[0].text
                 stat_value = stat[1].text
                 stat_dict[stat_name] = stat_value
-                hero_dict[stat_group_name] = stat_dict
-                hero_stats[id_hero[hero.get('data-category-id')]] = hero_dict
+            hero_dict[stat_group_name] = stat_dict
+        hero_stats[id_hero[hero.get('data-category-id')]] = hero_dict
 
     return {'general_stats': general_stats, 'hero_stats': hero_stats}
+"""
 
+"""
     
 f = open('./sample/StarGazer-11683', 'r')
 html = f.read()
@@ -160,8 +164,23 @@ print(time.strftime('%X') + (": End."))
 
 print(time.strftime('%X') + (": Begin xpath."))
 for i in range(0, 10000):
-    quickplay.xpath('.//*[@data-category-id and @data-group-id="comparisons"]')
+    quickplay.xpath('./section/div/div[@data-category-id and @data-group-id="comparisons"]')
 print(time.strftime('%X') + (": End."))
 
+print(time.strftime('%X') + (": Begin parse(html)."))
+for i in range(0, 10000):
+    parse(html)
+print(time.strftime('%X') + (": End."))
 
+print(time.strftime('%X') + (": Begin finding rank."))
+for i in range(0, 10000):
+    root.xpath("./body/div/section/div/div/div/div/div/div/div[@class='competitive-rank']/div")
+print(time.strftime('%X') + (": End."))
 
+print(time.strftime('%X') + (": Begin btag."))
+for i in range(0, 10000):
+    btag_link = root[0].xpath('./meta[@property="og:url"]')[0].get('content')
+    btag = re.match(r'^\S+/(\S+)$', btag_link).group(1)
+print(time.strftime('%X') + (": End."))
+
+"""
