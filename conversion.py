@@ -139,7 +139,7 @@ def convert_parsed(parsed: dict) -> dict:
     convert_game_mode(parsed['competitive_stats'])
         
 
-
+"""
 samples = []
 
 sample_filenames = listdir('./sample/')
@@ -169,3 +169,4 @@ print(time.strftime('%X') + (": End dumps."))
 save_file = open('./data/dumps.json', 'w')
 for parsed in all_parsed:
     save_file.write("{}\n".format(json.dumps(parsed)))
+"""

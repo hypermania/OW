@@ -2,14 +2,14 @@ import aiohttp
 import asyncio
 import time
 import re
-import uvloop
 
 from lxml import etree
 
 from util import check_name
 
+import uvloop
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+#asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 PROFILE_URL = 'https://playoverwatch.com/en-us/career/pc/{}'
     
@@ -31,10 +31,13 @@ async def check_existence(client, btag, sem):
     return result
 
 async def main():
-    sem = asyncio.Semaphore(500)
+    sem = asyncio.Semaphore(1000)
+
+    conn = aiohttp.TCPConnector(limit=0, force_close=True)
     
-    async with aiohttp.ClientSession(read_timeout=10, conn_timeout=10) as client:
+    async with aiohttp.ClientSession(read_timeout=10, conn_timeout=10, connector=conn) as client:
         count = 0
+        count_found = 0
         for name in names:
             tasks = []
             for num in nums:
@@ -46,9 +49,11 @@ async def main():
             for btag in result:
                 btag_save_file.write("{}\n".format(btag))
             btag_save_file.flush()
-            
-            count = count + 1            
-            print(time.strftime('%X') + ": Finished name {}. ({}/{})".format(name, count, 1295))
+
+            count += 1
+            count_found += len(result)
+            print(time.strftime('%X') + ": Finished name {}. (finished {} name, found {})".format(name, count, count_found))
+
 
             
 nums = list(range(1000, 5000))
@@ -75,16 +80,21 @@ for a in first:
         names.append(a + b)
 """
 
-_names = open('./dict/google-10000-english.txt', 'r')
+_names = open('./dict/random-name-master/first-names.txt', 'r')
 names = _names.read().split('\n')
 while names[-1] == '':
     names = names[:-1]
 names = list(filter(check_name, names))
+extended_names = []
+for name in names:
+    extended_names.append(name)
+    extended_names.append(name.upper())
+    extended_names.append(name.capitalize())
+names = extended_names
 
-btag_save_file = open('./data/list_generated_btags.txt', 'a')
 
-#last_btag = btag_file.read().split("\n")[:-1][-1]
-#last_name = re.match('(\S+)-\d+', last_btag)
+btag_save_file = open('./data/first_name_generated_btags.txt', 'a')
 
+print(time.strftime('%X') + ": Begin loop.")
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
