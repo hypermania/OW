@@ -31,7 +31,7 @@ async def check_existence(client, btag, sem):
     return result
 
 async def main():
-    sem = asyncio.Semaphore(1000)
+    sem = asyncio.Semaphore(500)
 
     conn = aiohttp.TCPConnector(limit=0, force_close=True)
     
@@ -62,35 +62,22 @@ nums.extend(list(range(21000,22000)))
 nums.extend(list(range(31000,32000)))
 nums.extend(list(range(41000,42000)))
 
-"""
-_first = open('./dict/first.txt', 'r')
-_second = open('./dict/second.txt', 'r')
-
-first = _first.read().split('\n')
-second = _second.read().split('\n')
-
-while first[-1] == '':
-    first = first[:-1]
-while second[-1] == '':
-    second = second[:-1]
-
-names = []
-for a in first:
-    for b in second:
-        names.append(a + b)
-"""
 
 _names = open('./dict/random-name-master/first-names.txt', 'r')
 names = _names.read().split('\n')
 while names[-1] == '':
     names = names[:-1]
 names = list(filter(check_name, names))
+print("Loaded {} names.".format(len(names)))
+
+"""
 extended_names = []
 for name in names:
     extended_names.append(name)
     extended_names.append(name.upper())
     extended_names.append(name.capitalize())
 names = extended_names
+"""
 
 
 btag_save_file = open('./data/first_name_generated_btags.txt', 'a')

@@ -101,16 +101,3 @@ for l in optimal:
     parts.extend(l)
 
 """
-
-with open('./generated_btags.txt', 'r') as btag_file:
-    btags = btag_file.read().split("\n")
-    while btags[-1] == '':
-        btags = btags[:-1]
-
-
-with open('./generated_btags_reduced.txt', 'a') as write_file:
-    for btag in reduced:
-        write_file.write("{}\n".format(btag))
-
-write_file.close()
-

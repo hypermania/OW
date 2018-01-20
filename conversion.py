@@ -139,7 +139,7 @@ def convert_parsed(parsed: dict) -> dict:
     convert_game_mode(parsed['competitive_stats'])
         
 
-"""
+
 samples = []
 
 sample_filenames = listdir('./sample/')
@@ -147,19 +147,20 @@ for filename in sample_filenames:
     f = open('./sample/' + filename, 'r')
     samples.append(f.read())
     f.close()
-    
+
 print(time.strftime('%X') + (": Begin parsing."))
 all_parsed = []
 for sample in samples:
     all_parsed.append(parse_career_profile(sample))
 print(time.strftime('%X') + (": End parsing."))
 
-      
 print(time.strftime('%X') + (": Begin conversion."))
 for parsed in all_parsed:
     convert_parsed(parsed)
 print(time.strftime('%X') + (": End conversion."))
 
+
+"""          
 print(time.strftime('%X') + (": Begin dumps."))
 for parsed in all_parsed:
     json.dumps(parsed)
@@ -170,3 +171,13 @@ save_file = open('./data/dumps.json', 'w')
 for parsed in all_parsed:
     save_file.write("{}\n".format(json.dumps(parsed)))
 """
+
+
+props = []
+ranks = []
+for parsed in all_parsed:
+    s = sum(parsed['competitive_stats']['general_stats']['Time Played'].values())
+    if s != 0 and parsed['general_info']['rank'] is not None:
+        p = parsed['competitive_stats']['general_stats']['Time Played']['Mccree'] / s
+        props.append(p)
+        ranks.append(parsed['general_info']['rank'])
